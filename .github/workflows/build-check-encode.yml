@@ -14,6 +14,8 @@ on:
 
 jobs:
   build-check-encode:
+    # Forks consume upstream-generated artifacts; do not create divergent commits.
+    if: ${{ github.repository == 'hafrey1/LunaTV-config' }}
     runs-on: ubuntu-latest
 
     permissions:
