@@ -82,6 +82,59 @@ def main():
     write_json(ROOT / "jingjian.json", jingjian)
     write_json(ROOT / "jin18.json", jin18)
 
+    # Point the repository's own subscription entry points at this fork.
+    worker_path = ROOT / "CORSAPI" / "_worker.js"
+    if worker_path.exists():
+        worker_text = worker_path.read_text(encoding="utf-8")
+        worker_text = worker_text.replace(
+            "raw.githubusercontent.com/hafrey1/LunaTV-config",
+            "raw.githubusercontent.com/blackhare69/LunaTV-config",
+        )
+        worker_path.write_text(worker_text, encoding="utf-8")
+
+    readme_path = ROOT / "README.md"
+    if readme_path.exists():
+        readme_text = readme_path.read_text(encoding="utf-8")
+        readme_text = readme_text.replace(
+            "raw.githubusercontent.com/hafrey1/LunaTV-config",
+            "raw.githubusercontent.com/blackhare69/LunaTV-config",
+        )
+        count_lines = {
+            "- **\`source=jin18\`**": (
+                f"- **\`source=jin18\`** - 精简版（{len(jin18['api_site'])}个资源，仅普通内容）"
+            ),
+            "- **\`source=jingjian\`**": (
+                f"- **\`source=jingjian\`** - 精简+成人版（{len(jingjian_sites)}个资源）"
+            ),
+            "- **\`source=full\`**": (
+                f"- **\`source=full\`** - 完整版（{len(api_site)}个资源，**默认**）"
+            ),
+        }
+        readme_lines = []
+        for line in readme_text.splitlines():
+            replacement = next(
+                (value for prefix, value in count_lines.items() if line.startswith(prefix)),
+                line,
+            )
+            readme_lines.append(replacement)
+        readme_text = "\\n".join(readme_lines) + "\\n"
+
+        note_marker = "<!-- fork-subscription-source-note -->"
+        if note_marker not in readme_text:
+            note = (
+                note_marker + "\\n"
+                "> 本 fork 的 raw `.txt` 订阅直链使用当前仓库。若使用 CORSAPI 的 "
+                "`?format=...` 订阅，请把本仓库更新后的 `CORSAPI/_worker.js` 部署到"
+                "你自己的 Worker；GitHub 同步不会自动部署 Cloudflare Worker。"
+            )
+            anchor = "\\n# 🌐 CORSAPI"
+            if anchor in readme_text:
+                readme_text = readme_text.replace(anchor, "\\n\\n" + note + anchor, 1)
+            else:
+                readme_text = readme_text.rstrip() + "\\n\\n" + note + "\\n"
+        readme_path.write_text(readme_text, encoding="utf-8")
+
+
     for source, target in (
         (CONFIG, ROOT / "LunaTV-config.txt"),
         (ROOT / "jingjian.json", ROOT / "jingjian.txt"),
