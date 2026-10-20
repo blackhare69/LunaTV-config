@@ -100,14 +100,14 @@ def main():
             "raw.githubusercontent.com/blackhare69/LunaTV-config",
         )
         count_lines = {
-            "- **\`source=jin18\`**": (
-                f"- **\`source=jin18\`** - 精简版（{len(jin18['api_site'])}个资源，仅普通内容）"
+            "- **`source=jin18`**": (
+                f"- **`source=jin18`** - 精简版（{len(jin18['api_site'])}个资源，仅普通内容）"
             ),
-            "- **\`source=jingjian\`**": (
-                f"- **\`source=jingjian\`** - 精简+成人版（{len(jingjian_sites)}个资源）"
+            "- **`source=jingjian`**": (
+                f"- **`source=jingjian`** - 精简+成人版（{len(jingjian_sites)}个资源）"
             ),
-            "- **\`source=full\`**": (
-                f"- **\`source=full\`** - 完整版（{len(api_site)}个资源，**默认**）"
+            "- **`source=full`**": (
+                f"- **`source=full`** - 完整版（{len(api_site)}个资源，**默认**）"
             ),
         }
         readme_lines = []
@@ -117,21 +117,21 @@ def main():
                 line,
             )
             readme_lines.append(replacement)
-        readme_text = "\\n".join(readme_lines) + "\\n"
+        readme_text = "\n".join(readme_lines) + "\n"
 
         note_marker = "<!-- fork-subscription-source-note -->"
         if note_marker not in readme_text:
             note = (
-                note_marker + "\\n"
+                note_marker + "\n"
                 "> 本 fork 的 raw `.txt` 订阅直链使用当前仓库。若使用 CORSAPI 的 "
                 "`?format=...` 订阅，请把本仓库更新后的 `CORSAPI/_worker.js` 部署到"
                 "你自己的 Worker；GitHub 同步不会自动部署 Cloudflare Worker。"
             )
-            anchor = "\\n# 🌐 CORSAPI"
+            anchor = "\n# 🌐 CORSAPI"
             if anchor in readme_text:
-                readme_text = readme_text.replace(anchor, "\\n\\n" + note + anchor, 1)
+                readme_text = readme_text.replace(anchor, "\n\n" + note + anchor, 1)
             else:
-                readme_text = readme_text.rstrip() + "\\n\\n" + note + "\\n"
+                readme_text = readme_text.rstrip() + "\n\n" + note + "\n"
         readme_path.write_text(readme_text, encoding="utf-8")
 
 
