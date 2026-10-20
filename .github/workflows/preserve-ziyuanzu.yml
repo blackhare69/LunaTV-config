@@ -1,0 +1,42 @@
+name: Preserve ziyuanzu sources and subscriptions
+
+on:
+  workflow_run:
+    workflows: ["Fork-sync"]
+    types: [completed]
+  schedule:
+    - cron: "30 17 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: preserve-ziyuanzu-sources
+  cancel-in-progress: false
+
+jobs:
+  merge-and-generate:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the fork
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Merge preserved sources and generate feeds
+        run: python3 scripts/merge_ziyuanzu.py
+
+      - name: Commit updated config and subscriptions
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- LunaTV-config.json jingjian.json jin18.json LunaTV-config.txt jingjian.txt jin18.txt; then
+            echo "Configuration and subscription feeds are already up to date."
+          else
+            git add LunaTV-config.json jingjian.json jin18.json LunaTV-config.txt jingjian.txt jin18.txt
+            git commit -m "ci: preserve ziyuanzu sources and subscriptions"
+            git push origin HEAD:main
+          fi
